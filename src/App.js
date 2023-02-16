@@ -1,20 +1,29 @@
 import "./App.css";
 import React, { useState } from "react";
-import { WebR } from "@r-wasm/webr";
+import { Console, WebR } from "@r-wasm/webr";
 import styled from "styled-components";
 import Editor from "@monaco-editor/react";
+import { FilesAndCodes } from "./constant";
 
 const webR = new WebR();
+let rnorm;
+
+const webRConsole = new Console({
+  canvasExec: (line) => {
+    return Function(`
+    document.getElementById('plot-canvas').getContext('2d').${line};
+`)();
+  },
+
+  prompt: () => {},
+});
 
 function App() {
   const [result, updateResult] = useState(["Loading webR..."]);
-  const [code, setCode] = useState(`
-  ## Online R compiler to run R program online
-  ## Print "Hello World!" message
-  message <-"Hello R!"
-  print(message)`);
+
+  const [code, setCode] = useState(FilesAndCodes[0].initialCode);
+  const [topicIndex, setTopicIndex] = useState(0);
   const [error, setError] = useState("");
-  let rnorm;
 
   const evaluateCode = async (code) => {
     try {
@@ -31,27 +40,53 @@ function App() {
 
   const runRCode = async () => {
     setError("");
-    rnorm = await evaluateCode(code);
 
-    if (rnorm) {
-      try {
-        const result = await rnorm.toArray();
-        updateResult(result);
-      } catch (e) {
-        console.log("The error", e);
-        setError(e.message);
-      }
+    await webR.init();
+
+    webRConsole.run();
+    webRConsole.stdin(code);
+    const result = await evaluateCode(code);
+
+    if (result) {
+      const output = await result.toArray();
+      updateResult(output);
     }
+  };
+
+  const handleFileChange = (e, index) => {
+    let i;
+    updateResult("");
+    const codeFile = FilesAndCodes[index].initialCode;
+    setTopicIndex(index);
+    setCode(codeFile);
+    const tablinks = document.getElementsByClassName("tablink");
+
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace("highlight", "");
+    }
+    e.currentTarget.className += "highlight";
   };
 
   return (
     <div className="App">
+      <RHeader>R online Compiler</RHeader>
       <RContainer>
         <CodeandFile>
-          <RHeader>R online Compiler</RHeader>
           <FileandRun>
-            <div>main.r</div>
-            <button onClick={runRCode}>Run</button>
+            <FileNames>
+              {FilesAndCodes.map((file, index) => {
+                return (
+                  <div
+                    className={`${index === 0 ? "highlight" : ""} tablink `}
+                    onClick={(e) => handleFileChange(e, index)}
+                  >
+                    {file.fileName}
+                  </div>
+                );
+              })}
+            </FileNames>
+
+            <RunButton onClick={runRCode}>Run</RunButton>
           </FileandRun>
 
           <Editor
@@ -64,11 +99,17 @@ function App() {
           />
         </CodeandFile>
 
-        <ResultSection>
+        <ResultSection id="result-container">
           {error ? (
-            <p>The Error:{error} </p>
+            <p className="error">The Error:{error} </p>
           ) : (
-            <p>Result : {result.join(",")}</p>
+            <p>Output : {result && result?.join(",")}</p>
+          )}
+
+          {topicIndex === 4 ? (
+            <Canvas id="plot-canvas" width="1000px" height="1000px"></Canvas>
+          ) : (
+            ""
           )}
         </ResultSection>
       </RContainer>
@@ -88,20 +129,56 @@ const RContainer = styled.div`
 const RHeader = styled.div`
   text-align: left;
   font-weight: bold;
+  width: 100%;
+  padding: 24px 48px;
+  border-bottom: 2px solid #d3dce6;
+`;
+
+const RunButton = styled.div`
+  background-color: #0456f3;
+  padding: 8px 24px;
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background-color: #1b46c9;
+  }
+`;
+
+const FileNames = styled.div`
+  display: flex;
+  gap: 1px;
+
+  cursor: pointer;
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const CodeandFile = styled.div`
   flex: 1;
   display: flex;
+  gap: 5px;
+
   flex-direction: column;
 `;
 const FileandRun = styled.div`
   display: flex;
   justify-content: space-between;
+  padding: 10px 0px;
 `;
 
 const ResultSection = styled.div`
   flex: 1;
+  text-align: left;
+  justify-content: flex-start;
+  padding: 20px;
+  padding-top: 48px;
+`;
+const Canvas = styled.canvas`
+  transform: scale(0.5);
+  transform-origin: left top;
+  margin-bottom: -150px;
+  margin-right: -150px;
 `;
 
 export default App;
