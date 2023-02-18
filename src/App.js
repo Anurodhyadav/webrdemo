@@ -37,15 +37,10 @@ function App() {
 
   useEffect(() => {
     console.log("enviroment name", process.env.NODE_ENV);
-    if (process.env.NODE_ENV != "development") {
-      const worker = new Worker(
-        new URL("./webr-serviceworker.js", import.meta.url, { type: "module" })
-      );
-      // worker.postMessage();
-      const webWorker = new Worker(
-        new URL("./webr-worker.js", import.meta.url, { type: "module" })
-      );
-    }
+
+    const worker = new Worker("./webr-serviceworker.js");
+    // worker.postMessage();
+    const webWorker = new Worker("./webr-worker.js");
 
     // webWorker.postMessage();
   }, []);
