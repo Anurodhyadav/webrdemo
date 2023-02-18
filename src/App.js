@@ -1,9 +1,10 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Console, WebR } from "@r-wasm/webr";
 import styled from "styled-components";
 import Editor from "@monaco-editor/react";
 import { FilesAndCodes } from "./constant";
+// import Worker from "worker-loader!./webr.worker.js";
 
 const webR = new WebR();
 let rnorm;
@@ -24,6 +25,30 @@ function App() {
   const [code, setCode] = useState(FilesAndCodes[0].initialCode);
   const [topicIndex, setTopicIndex] = useState(0);
   const [error, setError] = useState("");
+
+  // useEffect(() => {
+  //   const worker = new Worker();
+  //   // worker.addEventListener("message", ({ data }) => {
+  //   //   console.log({ workerMessage: data });
+  //   // });
+
+  //   worker.onmessage = (message) => console.log("message");
+  // }, []);
+
+  useEffect(() => {
+    console.log("THe enviroment name", process.env.NODE_ENV);
+    if (process.env.NODE_ENV != "development") {
+      const worker = new Worker(
+        new URL("./webr-serviceworker.js", import.meta.url, { type: "module" })
+      );
+      // worker.postMessage();
+      const webWorker = new Worker(
+        new URL("./webr-worker.js", import.meta.url, { type: "module" })
+      );
+    }
+
+    // webWorker.postMessage();
+  }, []);
 
   const evaluateCode = async (code) => {
     try {
