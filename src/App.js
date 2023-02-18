@@ -36,7 +36,7 @@ function App() {
   // }, []);
 
   useEffect(() => {
-    console.log("THe enviroment name", process.env.NODE_ENV);
+    console.log("The enviroment name", process.env.NODE_ENV);
 
     const worker = new Worker(
       new URL("./webr-serviceworker.js", import.meta.url, { type: "module" })
