@@ -26,25 +26,6 @@ function App() {
   const [topicIndex, setTopicIndex] = useState(0);
   const [error, setError] = useState("");
 
-  // useEffect(() => {
-  //   const worker = new Worker();
-  //   // worker.addEventListener("message", ({ data }) => {
-  //   //   console.log({ workerMessage: data });
-  //   // });
-
-  //   worker.onmessage = (message) => console.log("message");
-  // }, []);
-
-  useEffect(() => {
-    console.log("enviroment name", process.env.NODE_ENV);
-
-    const worker = new Worker("./webr-serviceworker.js");
-    // worker.postMessage();
-    const webWorker = new Worker("./webr-worker.js");
-
-    // webWorker.postMessage();
-  }, []);
-
   const evaluateCode = async (code) => {
     try {
       rnorm = await webR.evalR(code);
