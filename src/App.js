@@ -1,39 +1,45 @@
 import "./App.css";
-import React, { useEffect, useState } from "react";
-import { Console, WebR } from "@r-wasm/webr";
+import React, { useState } from "react";
+import { Console } from "@r-wasm/webr";
 import styled from "styled-components";
 import Editor from "@monaco-editor/react";
 import { FilesAndCodes } from "./constant";
-// import Worker from "worker-loader!./webr.worker.js";
-
-const webR = new WebR();
-let rnorm;
 
 const webRConsole = new Console({
   canvasExec: (line) => {
     return Function(`
-    document.getElementById('plot-canvas').getContext('2d').${line};
+  document.getElementById('plot-canvas').getContext('2d').${line};
 `)();
   },
+  stdout: (line) => {
+    const resultContainer = document.getElementById("output");
+    if (!resultContainer) return;
 
-  prompt: () => {},
+    const output = line;
+
+    const lineEle = document.createElement("div");
+    lineEle.style.color = "black";
+    lineEle.innerText = output;
+
+    resultContainer.appendChild(lineEle);
+  },
+  stderr: (line) => {
+    const resultContainer = document.getElementById("output");
+    const errorEle = document.createElement("div");
+    errorEle.style.color = "red";
+    errorEle.innerHTML = line;
+    resultContainer.innerHTML = "";
+    resultContainer.appendChild(errorEle);
+  },
+
+  prompt: (p) => document.getElementById("output").append(p),
 });
+webRConsole.run();
 
 function App() {
-  const [result, updateResult] = useState(["Loading webR..."]);
-
   const [code, setCode] = useState(FilesAndCodes[0].initialCode);
   const [topicIndex, setTopicIndex] = useState(0);
   const [error, setError] = useState("");
-
-  const evaluateCode = async (code) => {
-    try {
-      rnorm = await webR.evalR(code);
-    } catch (e) {
-      setError(e.message);
-    }
-    return rnorm;
-  };
 
   const handleCodeChange = (code) => {
     setCode(code);
@@ -42,21 +48,14 @@ function App() {
   const runRCode = async () => {
     setError("");
 
-    await webR.init();
-
-    webRConsole.run();
+    const resultContainer = document.getElementById("output");
+    resultContainer.innerText = "";
     webRConsole.stdin(code);
-    const result = await evaluateCode(code);
-
-    if (result) {
-      const output = await result.toArray();
-      updateResult(output);
-    }
   };
 
   const handleFileChange = (e, index) => {
     let i;
-    updateResult("");
+
     const codeFile = FilesAndCodes[index].initialCode;
     setTopicIndex(index);
     setCode(codeFile);
@@ -102,9 +101,15 @@ function App() {
 
         <ResultSection id="result-container">
           {error ? (
-            <p className="error">The Error:{error} </p>
+            <p id="error">The Error:{error} </p>
           ) : (
-            <p>Output : {result && result?.join(",")}</p>
+            <div>
+              <p id="output">
+                Programiz WebR is loading resources for a seamless coding
+                experience. You can start typing your code on the left and
+                unleash your coding superpowers 💪
+              </p>
+            </div>
           )}
 
           {topicIndex === 4 ? (

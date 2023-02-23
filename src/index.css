@@ -24,6 +24,6 @@ code {
   border-top: 3px solid #0456f3;
   background-color: #ffffff;
 }
-.error {
+#error {
   color: #d8000c;
 }
