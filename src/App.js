@@ -4,6 +4,7 @@ import { Console } from "@r-wasm/webr";
 import styled from "styled-components";
 import Editor from "@monaco-editor/react";
 import { FilesAndCodes } from "./constant";
+import { BrowserRouter as Router } from "react-router-dom";
 
 import loader from "./loading.svg";
 
@@ -84,73 +85,75 @@ function App() {
 
   return (
     <div className="App">
-      <RHeader>R online Compiler</RHeader>
-      <RContainer>
-        <CodeandFile>
-          <FileandRun>
-            <FileNames>
-              {FilesAndCodes.map((file, index) => {
-                return (
-                  <div
-                    className={`${index === 0 ? "highlight" : ""} tablink `}
-                    onClick={(e) => handleFileChange(e, index)}
-                  >
-                    {file.fileName}
-                  </div>
-                );
-              })}
-            </FileNames>
+      <Router basename="/r-programming/playground">
+        <RHeader>R online Compiler</RHeader>
+        <RContainer>
+          <CodeandFile>
+            <FileandRun>
+              <FileNames>
+                {FilesAndCodes.map((file, index) => {
+                  return (
+                    <div
+                      className={`${index === 0 ? "highlight" : ""} tablink `}
+                      onClick={(e) => handleFileChange(e, index)}
+                    >
+                      {file.fileName}
+                    </div>
+                  );
+                })}
+              </FileNames>
 
-            <RunButton onClick={runRCode}>Run</RunButton>
-          </FileandRun>
+              <RunButton onClick={runRCode}>Run</RunButton>
+            </FileandRun>
 
-          <Editor
-            height="80vh"
-            width={`100%`}
-            language={"R"}
-            value={code}
-            theme={"Xcode_default"}
-            onChange={(e) => handleCodeChange(e)}
-          />
-        </CodeandFile>
+            <Editor
+              height="80vh"
+              width={`100%`}
+              language={"R"}
+              value={code}
+              theme={"Xcode_default"}
+              onChange={(e) => handleCodeChange(e)}
+            />
+          </CodeandFile>
 
-        <ResultSection id="result-container">
-          {error ? (
-            <p id="error">The Error:{error} </p>
-          ) : (
-            <div>
-              <p id="output">
-                <div>
-                  {loadingText.split(".").map((el, index) => {
-                    if (index === 0) {
-                      return (
-                        <div>
-                          <div className="loaderClass">
-                            <img
-                              style={{ height: "50px", width: "50px" }}
-                              src={loader}
-                              alt="Logo"
-                            />
+          <ResultSection id="result-container">
+            {error ? (
+              <p id="error">The Error:{error} </p>
+            ) : (
+              <div>
+                <p id="output">
+                  <div>
+                    {loadingText.split(".").map((el, index) => {
+                      if (index === 0) {
+                        return (
+                          <div>
+                            <div className="loaderClass">
+                              <img
+                                style={{ height: "50px", width: "50px" }}
+                                src={loader}
+                                alt="Logo"
+                              />
+                            </div>
+
+                            <b>{el}.</b>
                           </div>
+                        );
+                      }
+                      return <div style={{ marginTop: "20px" }}>{el}</div>;
+                    })}
+                  </div>
+                </p>
+              </div>
+            )}
 
-                          <b>{el}.</b>
-                        </div>
-                      );
-                    }
-                    return <div style={{ marginTop: "20px" }}>{el}</div>;
-                  })}
-                </div>
-              </p>
-            </div>
-          )}
-
-          {topicIndex === 4 ? (
-            <Canvas id="plot-canvas" width="1000px" height="1000px"></Canvas>
-          ) : (
-            ""
-          )}
-        </ResultSection>
-      </RContainer>
+            {topicIndex === 4 ? (
+              <Canvas id="plot-canvas" width="1000px" height="1000px"></Canvas>
+            ) : (
+              ""
+            )}
+          </ResultSection>
+        </RContainer>
+      </Router>
     </div>
   );
 }
