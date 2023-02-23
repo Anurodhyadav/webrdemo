@@ -8,7 +8,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 
 import loader from "./loading.svg";
 
-const loadingText = `Programiz WebR is loading resources for a seamless coding
+const loadingText = `Datamentor is loading resources for a seamless coding
 experience. You can start typing your code on the left and
 unleash your coding superpowers 💪`;
 
@@ -86,7 +86,7 @@ function App() {
   return (
     <div className="App">
       <Router basename="/r-programming/playground">
-        <RHeader>R online Compiler</RHeader>
+        <RHeader>Online R playground</RHeader>
         <RContainer>
           <CodeandFile>
             <FileandRun>
