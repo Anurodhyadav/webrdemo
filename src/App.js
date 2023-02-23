@@ -5,6 +5,12 @@ import styled from "styled-components";
 import Editor from "@monaco-editor/react";
 import { FilesAndCodes } from "./constant";
 
+import loader from "./loading.svg";
+
+const loadingText = `Programiz WebR is loading resources for a seamless coding
+experience. You can start typing your code on the left and
+unleash your coding superpowers 💪`;
+
 const webRConsole = new Console({
   canvasExec: (line) => {
     return Function(`
@@ -22,6 +28,15 @@ const webRConsole = new Console({
     lineEle.innerText = output;
 
     resultContainer.appendChild(lineEle);
+
+    const firstChildTextContent = resultContainer.firstChild.textContent;
+
+    if (
+      firstChildTextContent.replace(/\s/g, "") ===
+      loadingText.replace(/\s/g, "")
+    ) {
+      resultContainer.removeChild(resultContainer.firstChild);
+    }
   },
   stderr: (line) => {
     const resultContainer = document.getElementById("output");
@@ -105,9 +120,26 @@ function App() {
           ) : (
             <div>
               <p id="output">
-                Programiz WebR is loading resources for a seamless coding
-                experience. You can start typing your code on the left and
-                unleash your coding superpowers 💪
+                <div>
+                  {loadingText.split(".").map((el, index) => {
+                    if (index === 0) {
+                      return (
+                        <div>
+                          <div className="loaderClass">
+                            <img
+                              style={{ height: "50px", width: "50px" }}
+                              src={loader}
+                              alt="Logo"
+                            />
+                          </div>
+
+                          <b>{el}.</b>
+                        </div>
+                      );
+                    }
+                    return <div style={{ marginTop: "20px" }}>{el}</div>;
+                  })}
+                </div>
               </p>
             </div>
           )}

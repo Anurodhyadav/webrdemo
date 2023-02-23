@@ -27,3 +27,8 @@ code {
 #error {
   color: #d8000c;
 }
+.loaderClass {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
