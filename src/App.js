@@ -113,6 +113,11 @@ function App() {
               value={code}
               theme={"Xcode_default"}
               onChange={(e) => handleCodeChange(e)}
+              options={{
+                minimap: {
+                  enabled: false,
+                },
+              }}
             />
           </CodeandFile>
 
