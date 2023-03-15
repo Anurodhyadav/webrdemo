@@ -15,13 +15,15 @@ const innitialTextAfterLoading = `R version 4.1.3 (2022-03-10)`;
 
 const webRConsole = new Console({
   canvasExec: (line) => {
-    document.getElementById("plot-canvas").style.display = "block";
+    const canvasElem = document.getElementById("plot-canvas");
+    canvasElem.style.display = "block";
+
     return Function(`
   document.getElementById('plot-canvas').getContext('2d').${line};
 `)();
   },
   stdout: (line) => {
-    const resultContainer = document.getElementById("output");
+    const resultContainer = document.getElementById("output-section");
 
     if (!resultContainer) return;
 
@@ -34,17 +36,16 @@ const webRConsole = new Console({
     if (output.startsWith("[1]")) {
       resultContainer.appendChild(lineEle);
     } else {
-      const currentInnerText = resultContainer?.firstChild?.textContent;
+      const currentInnerText = resultContainer?.textContent;
       if (currentInnerText !== innitialTextAfterLoading) {
         lineEle.innerText = innitialTextAfterLoading;
         resultContainer.appendChild(lineEle);
         document.getElementById("run-btn").disabled = false;
+        document.getElementById("run-btn").classList.remove("not-allowed");
         document.getElementById("run-btn").style.backgroundColor = "#2455EA";
       }
     }
-
     const firstChildTextContent = resultContainer.firstChild.textContent;
-
     if (
       firstChildTextContent.replace(/\s/g, "") ===
       loadingText.replace(/\s/g, "")
@@ -53,7 +54,7 @@ const webRConsole = new Console({
     }
   },
   stderr: (line) => {
-    const resultContainer = document.getElementById("output");
+    const resultContainer = document.getElementById("output-section");
     const errorEle = document.createElement("div");
     errorEle.style.color = "red";
     errorEle.innerHTML = line;
@@ -61,7 +62,7 @@ const webRConsole = new Console({
     resultContainer.appendChild(errorEle);
   },
 
-  prompt: (p) => document.getElementById("output").append(p),
+  prompt: (p) => document.getElementById("output-section").append(p),
 });
 webRConsole.run();
 
@@ -77,6 +78,7 @@ function App() {
   useEffect(() => {
     resizer = document.getElementById("codeandFile");
     document.getElementById("run-btn").disabled = true;
+    document.getElementById("run-btn").classList.add("not-allowed");
     document.getElementById("run-btn").style.backgroundColor = "#54575B";
     document.getElementById("plot-canvas").style.display = "none";
   }, []);
@@ -99,7 +101,7 @@ function App() {
 
   const runRCode = async () => {
     setError("");
-    const resultContainer = document.getElementById("output");
+    const resultContainer = document.getElementById("output-section");
     resultContainer.innerText = "";
     webRConsole.stdin(code);
   };
@@ -122,7 +124,7 @@ function App() {
     <div className="App">
       <Router basename="/r-programming/playground">
         <LogoAndHeader>
-          <img style={{ height: "50px", width: "50px" }} src={newLogo} />
+          <img style={{ height: "32px", width: "32px" }} src={newLogo} />
           <RHeader>R Code Playground </RHeader>
         </LogoAndHeader>
 
@@ -150,16 +152,19 @@ function App() {
             <Editor
               height="80vh"
               width={`100%`}
-              language={"R"}
+              language={"r"}
               value={code}
               onChange={(e) => handleCodeChange(e)}
               options={{
                 fontSize: "14px",
                 renderLineHighlight: "none",
-                padding: "0px",
+                scrollbar: {
+                  verticalScrollbarSize: 5,
+                },
                 minimap: {
                   enabled: false,
                 },
+                lineNumbersMinChars: 3,
               }}
             />
           </CodeandFile>
@@ -173,25 +178,25 @@ function App() {
             {error ? (
               <p id="error">The Error:{error} </p>
             ) : (
-              <div className="output-section">
-                <p id="output">
-                  <div className="loading-text">
-                    {loadingText.split(".").map((el, index) => {
-                      if (index === 0) {
-                        return (
-                          <div className="mainLoadingText">
-                            <b>{el}.</b>
+              <div id="output-section">
+                <div className="loading-text">
+                  {loadingText.split(".").map((el, index) => {
+                    if (index === 0) {
+                      return (
+                        <div className="mainLoadingText">
+                          <div>
+                            <p className="text-main">{el}.</p>
                           </div>
-                        );
-                      }
-                      return <div className="secondaryLoadingText">{el}</div>;
-                    })}
-                  </div>
-                </p>
+                        </div>
+                      );
+                    }
+                    return <div className="secondaryLoadingText">{el}</div>;
+                  })}
+                </div>
               </div>
             )}
 
-            <Canvas id="plot-canvas" width="1008" height="1008"></Canvas>
+            <Canvas id="plot-canvas" width={"1008"} height={"1008"}></Canvas>
           </ResultSection>
         </RContainer>
       </Router>
@@ -295,6 +300,7 @@ const OutputHeader = styled.div`
   border-color: #d5dce5;
 `;
 const Canvas = styled.canvas`
+  object-fit: contain;
   transform: scale(0.5);
   transform-origin: left top;
   @media (max-width: 768px) {

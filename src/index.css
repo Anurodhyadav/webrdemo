@@ -64,11 +64,14 @@ code {
   align-items: center;
 }
 
-.output-section {
+#output-section {
   padding-left: 10px;
 }
 .loading-text {
   color: #66678e;
+}
+.not-allowed {
+  cursor: not-allowed !important;
 }
 
 /* #plot-canvas {
@@ -79,6 +82,10 @@ code {
 .mainLoadingText {
   font-family: boldFont;
   font-size: 24px;
+}
+
+.lottie-file {
+  float: left;
 }
 
 @media screen and (max-width: 768px) {
@@ -92,4 +99,9 @@ code {
   font-family: mediumFont;
   font-size: 14px;
   margin-top: 20px;
+}
+
+.text-main::after {
+  content: url("./loading.svg");
+  display: inline-block;
 }
