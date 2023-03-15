@@ -39,6 +39,19 @@ code {
   font-family: codeFont;
 }
 
+.monaco-editor.vs .margin-view-overlays {
+  background-color: #eff2f6;
+  color: #999999;
+  text-align: center;
+  width: 35px !important;
+  border-right: 1.00528px solid #dddddd;
+}
+
+.monaco-editor .margin-view-overlays .line-numbers {
+  text-align: center !important;
+  left: 8px !important;
+}
+
 .tablink {
   font-family: lightFont;
   color: #636489;

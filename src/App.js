@@ -164,7 +164,7 @@ function App() {
                 minimap: {
                   enabled: false,
                 },
-                lineNumbersMinChars: 3,
+                lineNumbersMinChars: 2,
               }}
             />
           </CodeandFile>
@@ -265,7 +265,6 @@ const CodeandFile = styled.div`
   width: 50%;
   min-width: 300px;
   display: flex;
-  gap: 5px;
   flex-direction: column;
   @media (max-width: 768px) {
     width: 100%;
@@ -277,7 +276,7 @@ const FileandRun = styled.div`
   align-items: center;
   background-color: #eff2f6;
   justify-content: space-between;
-  padding: 0px 16px;
+  padding: 0px 35px;
   border-width: 1px 1px 1px 0px;
   border-style: solid;
   border-color: #d5dce5;
