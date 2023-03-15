@@ -143,15 +143,12 @@ function App() {
                   );
                 })}
               </FileNames>
-
               <RunButton id="run-btn" onClick={runRCode}>
                 Run
               </RunButton>
             </FileandRun>
 
             <Editor
-              height="80vh"
-              width={`100%`}
               language={"r"}
               value={code}
               onChange={(e) => handleCodeChange(e)}
@@ -172,7 +169,6 @@ function App() {
             onMouseDown={ResizeElement}
             className="resize-bar"
           ></ResizeBar>
-
           <ResultSection id="result-container">
             <OutputHeader>Output</OutputHeader>
             {error ? (
@@ -195,7 +191,6 @@ function App() {
                 </div>
               </div>
             )}
-
             <Canvas id="plot-canvas" width={"1008"} height={"1008"}></Canvas>
           </ResultSection>
         </RContainer>
@@ -207,6 +202,7 @@ function App() {
 const RContainer = styled.div`
   display: flex;
   width: 100%;
+  height: calc(100vh - 105px);
   overflow: scroll;
   @media (max-width: 768px) {
     flex-direction: column;
@@ -268,7 +264,7 @@ const CodeandFile = styled.div`
   flex-direction: column;
   @media (max-width: 768px) {
     width: 100%;
-    height: 50vh;
+    height: 40vh;
   }
 `;
 const FileandRun = styled.div`
@@ -277,6 +273,7 @@ const FileandRun = styled.div`
   background-color: #eff2f6;
   justify-content: space-between;
   padding: 0px 35px;
+  padding-right: 12px;
   border-width: 1px 1px 1px 0px;
   border-style: solid;
   border-color: #d5dce5;
