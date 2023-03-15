@@ -1,27 +1,58 @@
+@font-face {
+  font-family: codeFont;
+  src: url("fonts/DroidSansMono.ttf");
+}
+
+@font-face {
+  font-family: boldFont;
+  src: url("fonts/EuclidCircularA-Bold.otf");
+}
+
+@font-face {
+  font-family: lightFont;
+  src: url("fonts/EuclidCircularA-Light.otf");
+}
+
+@font-face {
+  font-family: mediumFont;
+  src: url("fonts/EuclidCircularA-Medium.otf");
+}
+
+@font-face {
+  font-family: semiBold;
+  src: url("fonts/EuclidCircularA-Semibold.otf");
+}
+
+@font-face {
+  font-family: regular;
+  src: url("fonts/EuclidCircularA-Regular.otf");
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: regular;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: codeFont;
 }
 
 .tablink {
-  color: white;
-  background-color: #495057;
-  padding: 5px 10px;
+  font-family: lightFont;
+  color: #636489;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid #d5dce5;
+  padding: 12px 9px;
+  width: 78px;
+  height: 17px;
 }
 
 .highlight {
-  margin-top: -5px;
+  margin-top: -3px;
   color: black;
-  border-top: 3px solid #0456f3;
+  border-top: 5px solid #0456f3;
   background-color: #ffffff;
 }
 #error {
@@ -31,4 +62,34 @@ code {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+}
+
+.output-section {
+  padding-left: 10px;
+}
+.loading-text {
+  color: #66678e;
+}
+
+/* #plot-canvas {
+  background-color: #ffffff;
+  width: 100%;
+} */
+
+.mainLoadingText {
+  font-family: boldFont;
+  font-size: 24px;
+}
+
+@media screen and (max-width: 768px) {
+  .mainLoadingText {
+    font-family: mediumFont;
+    font-size: 20px;
+  }
+}
+
+.secondaryLoadingText {
+  font-family: mediumFont;
+  font-size: 14px;
+  margin-top: 20px;
 }

@@ -1,25 +1,28 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Console } from "@r-wasm/webr";
 import styled from "styled-components";
 import Editor from "@monaco-editor/react";
 import { FilesAndCodes } from "./constant";
 import { BrowserRouter as Router } from "react-router-dom";
-
-import loader from "./loading.svg";
+import newLogo from "./newLogo.svg";
 
 const loadingText = `Datamentor is loading resources for a seamless coding
 experience. You can start typing your code on the left and
 unleash your coding superpowers 💪`;
 
+const innitialTextAfterLoading = `R version 4.1.3 (2022-03-10)`;
+
 const webRConsole = new Console({
   canvasExec: (line) => {
+    document.getElementById("plot-canvas").style.display = "block";
     return Function(`
   document.getElementById('plot-canvas').getContext('2d').${line};
 `)();
   },
   stdout: (line) => {
     const resultContainer = document.getElementById("output");
+
     if (!resultContainer) return;
 
     const output = line;
@@ -28,7 +31,17 @@ const webRConsole = new Console({
     lineEle.style.color = "black";
     lineEle.innerText = output;
 
-    resultContainer.appendChild(lineEle);
+    if (output.startsWith("[1]")) {
+      resultContainer.appendChild(lineEle);
+    } else {
+      const currentInnerText = resultContainer?.firstChild?.textContent;
+      if (currentInnerText !== innitialTextAfterLoading) {
+        lineEle.innerText = innitialTextAfterLoading;
+        resultContainer.appendChild(lineEle);
+        document.getElementById("run-btn").disabled = false;
+        document.getElementById("run-btn").style.backgroundColor = "#2455EA";
+      }
+    }
 
     const firstChildTextContent = resultContainer.firstChild.textContent;
 
@@ -54,16 +67,38 @@ webRConsole.run();
 
 function App() {
   const [code, setCode] = useState(FilesAndCodes[0].initialCode);
-  const [topicIndex, setTopicIndex] = useState(0);
   const [error, setError] = useState("");
 
   const handleCodeChange = (code) => {
     setCode(code);
   };
+  let resizer;
+
+  useEffect(() => {
+    resizer = document.getElementById("codeandFile");
+    document.getElementById("run-btn").disabled = true;
+    document.getElementById("run-btn").style.backgroundColor = "#54575B";
+    document.getElementById("plot-canvas").style.display = "none";
+  }, []);
+
+  const ResizeElement = () => {
+    document.addEventListener("mousemove", resize, false);
+    document.addEventListener(
+      "mouseup",
+      () => {
+        document.removeEventListener("mousemove", resize, false);
+      },
+      false
+    );
+
+    function resize(e) {
+      const size = `${e.x}px`;
+      resizer.style.width = size;
+    }
+  };
 
   const runRCode = async () => {
     setError("");
-
     const resultContainer = document.getElementById("output");
     resultContainer.innerText = "";
     webRConsole.stdin(code);
@@ -73,7 +108,7 @@ function App() {
     let i;
 
     const codeFile = FilesAndCodes[index].initialCode;
-    setTopicIndex(index);
+
     setCode(codeFile);
     const tablinks = document.getElementsByClassName("tablink");
 
@@ -86,9 +121,13 @@ function App() {
   return (
     <div className="App">
       <Router basename="/r-programming/playground">
-        <RHeader>Online R playground</RHeader>
+        <LogoAndHeader>
+          <img style={{ height: "50px", width: "50px" }} src={newLogo} />
+          <RHeader>R Code Playground </RHeader>
+        </LogoAndHeader>
+
         <RContainer>
-          <CodeandFile>
+          <CodeandFile id="codeandFile">
             <FileandRun>
               <FileNames>
                 {FilesAndCodes.map((file, index) => {
@@ -103,7 +142,9 @@ function App() {
                 })}
               </FileNames>
 
-              <RunButton onClick={runRCode}>Run</RunButton>
+              <RunButton id="run-btn" onClick={runRCode}>
+                Run
+              </RunButton>
             </FileandRun>
 
             <Editor
@@ -111,51 +152,46 @@ function App() {
               width={`100%`}
               language={"R"}
               value={code}
-              theme={"Xcode_default"}
               onChange={(e) => handleCodeChange(e)}
               options={{
+                fontSize: "14px",
+                renderLineHighlight: "none",
+                padding: "0px",
                 minimap: {
                   enabled: false,
                 },
               }}
             />
           </CodeandFile>
+          <ResizeBar
+            onMouseDown={ResizeElement}
+            className="resize-bar"
+          ></ResizeBar>
 
           <ResultSection id="result-container">
+            <OutputHeader>Output</OutputHeader>
             {error ? (
               <p id="error">The Error:{error} </p>
             ) : (
-              <div>
+              <div className="output-section">
                 <p id="output">
-                  <div>
+                  <div className="loading-text">
                     {loadingText.split(".").map((el, index) => {
                       if (index === 0) {
                         return (
-                          <div>
-                            <div className="loaderClass">
-                              <img
-                                style={{ height: "50px", width: "50px" }}
-                                src={loader}
-                                alt="Logo"
-                              />
-                            </div>
-
+                          <div className="mainLoadingText">
                             <b>{el}.</b>
                           </div>
                         );
                       }
-                      return <div style={{ marginTop: "20px" }}>{el}</div>;
+                      return <div className="secondaryLoadingText">{el}</div>;
                     })}
                   </div>
                 </p>
               </div>
             )}
 
-            {topicIndex === 4 ? (
-              <Canvas id="plot-canvas" width="1000px" height="1000px"></Canvas>
-            ) : (
-              ""
-            )}
+            <Canvas id="plot-canvas" width="1008" height="1008"></Canvas>
           </ResultSection>
         </RContainer>
       </Router>
@@ -166,23 +202,41 @@ function App() {
 const RContainer = styled.div`
   display: flex;
   width: 100%;
-  padding: 24px;
+  overflow: scroll;
   @media (max-width: 768px) {
     flex-direction: column;
   }
 `;
 
 const RHeader = styled.div`
+  font-family: lightFont;
   text-align: left;
-  font-weight: bold;
   width: 100%;
-  padding: 24px 48px;
-  border-bottom: 2px solid #d3dce6;
 `;
 
-const RunButton = styled.div`
-  background-color: #0456f3;
+const ResizeBar = styled.div`
+  display: inline;
+  width: 1%;
+  height: 100vh;
+  background-color: #d5dce5;
+  cursor: ew-resize;
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const RunButton = styled.button`
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 2px;
   padding: 8px 24px;
+  width: 78px;
+  height: 34px;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 17px;
   color: white;
   cursor: pointer;
   &:hover {
@@ -190,41 +244,62 @@ const RunButton = styled.div`
   }
 `;
 
+const LogoAndHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+`;
+
 const FileNames = styled.div`
   display: flex;
-  gap: 1px;
-
   cursor: pointer;
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
 `;
 
 const CodeandFile = styled.div`
-  flex: 1;
+  width: 50%;
+  min-width: 300px;
   display: flex;
   gap: 5px;
-
   flex-direction: column;
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 50vh;
+  }
 `;
 const FileandRun = styled.div`
   display: flex;
+  align-items: center;
+  background-color: #eff2f6;
   justify-content: space-between;
-  padding: 10px 0px;
+  padding: 0px 16px;
+  border-width: 1px 1px 1px 0px;
+  border-style: solid;
+  border-color: #d5dce5;
 `;
 
 const ResultSection = styled.div`
   flex: 1;
   text-align: left;
   justify-content: flex-start;
-  padding: 20px;
-  padding-top: 48px;
+  min-width: 300px;
+`;
+
+const OutputHeader = styled.div`
+  font-family: lightFont;
+  background-color: #eff2f6;
+  padding: 12px 24px;
+  background: #eff2f6;
+  border-width: 1px 1px 1px 0px;
+  border-style: solid;
+  border-color: #d5dce5;
 `;
 const Canvas = styled.canvas`
   transform: scale(0.5);
   transform-origin: left top;
-  margin-bottom: -150px;
-  margin-right: -150px;
+  @media (max-width: 768px) {
+    transform: scale(0.3);
+  }
 `;
 
 export default App;
