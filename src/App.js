@@ -24,6 +24,7 @@ const webRConsole = new Console({
   },
   stdout: (line) => {
     const resultContainer = document.getElementById("output-section");
+    const runBtn = document.getElementById("run-btn");
 
     if (!resultContainer) return;
 
@@ -40,9 +41,9 @@ const webRConsole = new Console({
       if (currentInnerText !== innitialTextAfterLoading) {
         lineEle.innerText = innitialTextAfterLoading;
         resultContainer.appendChild(lineEle);
-        document.getElementById("run-btn").disabled = false;
-        document.getElementById("run-btn").classList.remove("not-allowed");
-        document.getElementById("run-btn").style.backgroundColor = "#2455EA";
+        runBtn.disabled = false;
+        runBtn.classList.remove("not-allowed");
+        runBtn.style.backgroundColor = "#2455EA";
       }
     }
     const firstChildTextContent = resultContainer.firstChild.textContent;
@@ -56,9 +57,10 @@ const webRConsole = new Console({
   stderr: (line) => {
     const resultContainer = document.getElementById("output-section");
     const errorEle = document.createElement("div");
-    errorEle.style.color = "red";
+    errorEle.style.color = "#E34C4C";
+
     errorEle.innerHTML = line;
-    resultContainer.innerHTML = "";
+
     resultContainer.appendChild(errorEle);
   },
 
@@ -77,9 +79,10 @@ function App() {
 
   useEffect(() => {
     resizer = document.getElementById("codeandFile");
-    document.getElementById("run-btn").disabled = true;
-    document.getElementById("run-btn").classList.add("not-allowed");
-    document.getElementById("run-btn").style.backgroundColor = "#54575B";
+    const runBtnElem = document.getElementById("run-btn");
+    runBtnElem.disabled = true;
+    runBtnElem.classList.add("not-allowed");
+    runBtnElem.style.backgroundColor = "#54575B";
     document.getElementById("plot-canvas").style.display = "none";
   }, []);
 
@@ -100,7 +103,6 @@ function App() {
   };
 
   const runRCode = async () => {
-    setError("");
     const resultContainer = document.getElementById("output-section");
     resultContainer.innerText = "";
     webRConsole.stdin(code);
@@ -171,26 +173,23 @@ function App() {
           ></ResizeBar>
           <ResultSection id="result-container">
             <OutputHeader>Output</OutputHeader>
-            {error ? (
-              <p id="error">The Error:{error} </p>
-            ) : (
-              <div id="output-section">
-                <div className="loading-text">
-                  {loadingText.split(".").map((el, index) => {
-                    if (index === 0) {
-                      return (
-                        <div className="mainLoadingText">
-                          <div>
-                            <p className="text-main">{el}.</p>
-                          </div>
+            <div id="output-section">
+              <div className="loading-text">
+                {loadingText.split(".").map((el, index) => {
+                  if (index === 0) {
+                    return (
+                      <div className="mainLoadingText">
+                        <div>
+                          <p className="text-main">{el}.</p>
                         </div>
-                      );
-                    }
-                    return <div className="secondaryLoadingText">{el}</div>;
-                  })}
-                </div>
+                      </div>
+                    );
+                  }
+                  return <div className="secondaryLoadingText">{el}</div>;
+                })}
               </div>
-            )}
+            </div>
+
             <Canvas id="plot-canvas" width={"1008"} height={"1008"}></Canvas>
           </ResultSection>
         </RContainer>
@@ -280,6 +279,7 @@ const FileandRun = styled.div`
 `;
 
 const ResultSection = styled.div`
+  z-index: 100;
   flex: 1;
   text-align: left;
   justify-content: flex-start;
