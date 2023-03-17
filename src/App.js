@@ -5,6 +5,7 @@ import styled from "styled-components";
 import Editor from "@monaco-editor/react";
 import { FilesAndCodes } from "./constant";
 import { BrowserRouter as Router } from "react-router-dom";
+
 import newLogo from "./newLogo.svg";
 
 const loadingText = `Datamentor is loading resources for a seamless coding
@@ -43,6 +44,8 @@ const webRConsole = new Console({
         resultContainer.appendChild(lineEle);
         runBtn.disabled = false;
         runBtn.classList.remove("not-allowed");
+
+        document.getElementById("tooltipId").remove("tooltip");
         runBtn.style.backgroundColor = "#2455EA";
       }
     }
@@ -58,7 +61,6 @@ const webRConsole = new Console({
     const resultContainer = document.getElementById("output-section");
     const errorEle = document.createElement("div");
     errorEle.style.color = "#E34C4C";
-
     errorEle.innerHTML = line;
 
     resultContainer.appendChild(errorEle);
@@ -70,7 +72,6 @@ webRConsole.run();
 
 function App() {
   const [code, setCode] = useState(FilesAndCodes[0].initialCode);
-  const [error, setError] = useState("");
 
   const handleCodeChange = (code) => {
     setCode(code);
@@ -132,7 +133,7 @@ function App() {
 
         <RContainer>
           <CodeandFile id="codeandFile">
-            <FileandRun>
+            <FileandRun className="fileAndRun">
               <FileNames>
                 {FilesAndCodes.map((file, index) => {
                   return (
@@ -145,18 +146,29 @@ function App() {
                   );
                 })}
               </FileNames>
-              <RunButton id="run-btn" onClick={runRCode}>
+
+              <RunButton
+                id="run-btn"
+                className="toolTip-wrapper"
+                onClick={runRCode}
+              >
                 Run
+                <div id="tooltipId" class="tooltip">
+                  Files loading, please wait.
+                </div>
               </RunButton>
             </FileandRun>
 
             <Editor
               language={"r"}
+              className="editor"
               value={code}
               onChange={(e) => handleCodeChange(e)}
               options={{
                 fontSize: "14px",
+                contextmenu: false,
                 renderLineHighlight: "none",
+                selectOnLineNumbers: true,
                 scrollbar: {
                   verticalScrollbarSize: 5,
                 },
@@ -216,7 +228,7 @@ const RHeader = styled.div`
 
 const ResizeBar = styled.div`
   display: inline;
-  width: 1%;
+  width: 5px;
   height: 100vh;
   background-color: #d5dce5;
   cursor: ew-resize;
@@ -273,9 +285,8 @@ const FileandRun = styled.div`
   justify-content: space-between;
   padding: 0px 35px;
   padding-right: 12px;
+  border: 1px solid #d5dce5;
   border-width: 1px 1px 1px 0px;
-  border-style: solid;
-  border-color: #d5dce5;
 `;
 
 const ResultSection = styled.div`
