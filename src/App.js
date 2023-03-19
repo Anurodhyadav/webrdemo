@@ -280,13 +280,20 @@ const CodeandFile = styled.div`
 `;
 const FileandRun = styled.div`
   display: flex;
+  position: relative;
   align-items: center;
   background-color: #eff2f6;
   justify-content: space-between;
   padding: 0px 35px;
   padding-right: 12px;
   border: 1px solid #d5dce5;
-  border-width: 1px 1px 1px 0px;
+  border-width: 1px 1px 0px 0px;
+`;
+const OutputHeader = styled.div`
+  font-family: lightFont;
+  background-color: #eff2f6;
+  padding: 12px 24px;
+  border: 1px solid #d5dce5;
 `;
 
 const ResultSection = styled.div`
@@ -297,15 +304,6 @@ const ResultSection = styled.div`
   min-width: 300px;
 `;
 
-const OutputHeader = styled.div`
-  font-family: lightFont;
-  background-color: #eff2f6;
-  padding: 12px 24px;
-  background: #eff2f6;
-  border-width: 1px 1px 1px 0px;
-  border-style: solid;
-  border-color: #d5dce5;
-`;
 const Canvas = styled.canvas`
   object-fit: contain;
   transform: scale(0.5);
