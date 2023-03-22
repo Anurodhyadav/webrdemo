@@ -1,8 +1,7 @@
 import "./App.css";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Console } from "@r-wasm/webr";
 import styled from "styled-components";
-import Editor from "@monaco-editor/react";
 import { FilesAndCodes } from "./constant";
 import { BrowserRouter as Router } from "react-router-dom";
 
@@ -72,11 +71,18 @@ webRConsole.run();
 
 function App() {
   const [code, setCode] = useState(FilesAndCodes[0].initialCode);
-
-  const handleCodeChange = (code) => {
-    setCode(code);
-  };
+  const codeEditorWrapperRef = useRef(null);
+  const codeMirrorRef = useRef(null);
   let resizer;
+
+  const loadCodeMirror = () => {
+    codeMirrorRef.current = window.CodeMirror(codeEditorWrapperRef.current, {
+      lineNumbers: true,
+      lineWrapping: true,
+
+      value: code,
+    });
+  };
 
   useEffect(() => {
     resizer = document.getElementById("codeandFile");
@@ -85,6 +91,10 @@ function App() {
     runBtnElem.classList.add("not-allowed");
     runBtnElem.style.backgroundColor = "#54575B";
     document.getElementById("plot-canvas").style.display = "none";
+    loadCodeMirror();
+    return () => {
+      codeEditorWrapperRef.current.innerText = "";
+    };
   }, []);
 
   const ResizeElement = () => {
@@ -104,9 +114,10 @@ function App() {
   };
 
   const runRCode = async () => {
+    const codeToRun = codeMirrorRef.current.getValue();
     const resultContainer = document.getElementById("output-section");
     resultContainer.innerText = "";
-    webRConsole.stdin(code);
+    webRConsole.stdin(codeToRun);
   };
 
   const handleFileChange = (e, index) => {
@@ -158,26 +169,7 @@ function App() {
                 </div>
               </RunButton>
             </FileandRun>
-
-            <Editor
-              language={"r"}
-              className="editor"
-              value={code}
-              onChange={(e) => handleCodeChange(e)}
-              options={{
-                fontSize: "14px",
-                contextmenu: false,
-                renderLineHighlight: "none",
-                selectOnLineNumbers: true,
-                scrollbar: {
-                  verticalScrollbarSize: 5,
-                },
-                minimap: {
-                  enabled: false,
-                },
-                lineNumbersMinChars: 2,
-              }}
-            />
+            <div ref={codeEditorWrapperRef}></div>
           </CodeandFile>
           <ResizeBar
             onMouseDown={ResizeElement}
@@ -284,7 +276,7 @@ const FileandRun = styled.div`
   align-items: center;
   background-color: #eff2f6;
   justify-content: space-between;
-  padding: 0px 35px;
+  padding: 0px 29px;
   padding-right: 12px;
   border: 1px solid #d5dce5;
   border-width: 1px 1px 0px 0px;
@@ -292,8 +284,9 @@ const FileandRun = styled.div`
 const OutputHeader = styled.div`
   font-family: lightFont;
   background-color: #eff2f6;
-  padding: 12px 24px;
+  padding: 11px 24px;
   border: 1px solid #d5dce5;
+  border-left: 0px;
 `;
 
 const ResultSection = styled.div`

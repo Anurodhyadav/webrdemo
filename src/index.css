@@ -35,34 +35,36 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-div.view-lines.monaco-mouse-cursor-text {
+.CodeMirror pre.CodeMirror-line,
+.CodeMirror pre.CodeMirror-line-like {
   font-family: codeFont !important;
 }
 
-.monaco-editor.vs .margin-view-overlays {
+.CodeMirror {
+  font-size: 14px;
+  border: 1px solid #d5dce5;
+  border-top: 0px;
+  height: 100vh !important;
+  background: #ffff;
+}
+
+.CodeMirror-gutters {
+  border: none;
+  width: 28px;
+  border-top: 1px solid #d5dce5;
+  border-right: 1px solid #d5dce5;
   background-color: #eff2f6;
-  color: #999999;
-  text-align: center;
-  width: 35px !important;
-  border-right: 1.00528px solid #dddddd;
 }
 
-.monaco-editor .margin-view-overlays .line-numbers {
-  text-align: right !important;
-  left: 9px !important;
-  color: rgba(99, 100, 137, 0.6) !important;
-}
-
-.monaco-editor .line-numbers.active-line-number {
-  color: rgba(99, 100, 137, 1) !important;
-}
-
+/* div > pre > span[role="presentation"] {
+  background-color: red;
+} */
 .tablink {
   font-family: lightFont;
   color: #636489;
   border: 1px solid #d5dce5;
   border-bottom: 0px;
-  background: rgba(255, 255, 255, 0.6);
+  background: #f5f5f5;
   padding: 12px 9px;
   width: 78px;
   height: 17px;
@@ -72,14 +74,14 @@ div.view-lines.monaco-mouse-cursor-text {
   position: absolute;
   margin-left: 97px;
   bottom: 0;
-  width: calc(100% - 97px);
+  width: 87%;
   border-bottom: 1px solid #d5dce5;
 }
 
 .highlight {
-  margin-top: -3px;
+  margin-top: -1px;
   color: black;
-  border-top: 5px solid #0456f3;
+  border-top: 2px solid #0456f3;
   background-color: #ffffff;
 }
 
@@ -112,14 +114,13 @@ div.view-lines.monaco-mouse-cursor-text {
   font-size: 24px;
 }
 
-.lottie-file {
-  float: left;
-}
-
 @media screen and (max-width: 768px) {
   .mainLoadingText {
     font-family: mediumFont;
     font-size: 20px;
+  }
+  .CodeMirror {
+    height: 40vh !important;
   }
 }
 

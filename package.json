@@ -4,7 +4,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@monaco-editor/react": "^4.4.6",
     "@r-wasm/webr": "^0.1.0-alpha.16",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
