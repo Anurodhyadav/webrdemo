@@ -1,17 +1,25 @@
 import "./App.css";
-import React, { useEffect, useState, useRef } from "react";
-import { Console } from "@r-wasm/webr";
-import styled from "styled-components";
-import { FilesAndCodes } from "./constant";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
+import styled from "styled-components";
+import {
+  createFS,
+  fs,
+  allFiles,
+  getValueOfGivenPath,
+  getUpdatedCode,
+} from "./utils";
+import { RContext } from "./context";
 
 import newLogo from "./newLogo.svg";
+import { Console } from "./fs";
+import { NodeStructure } from "./filesAndFolder";
 
 const loadingText = `Datamentor is loading resources for a seamless coding
 experience. You can start typing your code on the left and
 unleash your coding superpowers 💪`;
 
-const innitialTextAfterLoading = `R version 4.1.3 (2022-03-10)`;
+const innitialTextAfterLoading = ``;
 
 const webRConsole = new Console({
   canvasExec: (line) => {
@@ -34,7 +42,7 @@ const webRConsole = new Console({
     lineEle.style.color = "black";
     lineEle.innerText = output;
 
-    if (output.startsWith("[1]")) {
+    if (output) {
       resultContainer.appendChild(lineEle);
     } else {
       const currentInnerText = resultContainer?.textContent;
@@ -44,7 +52,7 @@ const webRConsole = new Console({
         runBtn.disabled = false;
         runBtn.classList.remove("not-allowed");
 
-        document.getElementById("tooltipId").remove("tooltip");
+        document.getElementById("tooltipId")?.remove("tooltip");
         runBtn.style.backgroundColor = "#2455EA";
       }
     }
@@ -70,19 +78,19 @@ const webRConsole = new Console({
 webRConsole.run();
 
 function App() {
-  const [code, setCode] = useState(FilesAndCodes[0].initialCode);
+  const { fileStructure, setFileStructure } = useContext(RContext);
+
+  const initialCodeOfMainFile = fileStructure.filter(
+    (file) => file.path === "/RCode/src/main.R"
+  );
+
+  const [code, setCode] = useState(initialCodeOfMainFile[0].value);
+
   const codeEditorWrapperRef = useRef(null);
   const codeMirrorRef = useRef(null);
+  const [activeFile, setActiveFile] = useState(null);
+  const initRef = useRef(false);
   let resizer;
-
-  const loadCodeMirror = () => {
-    codeMirrorRef.current = window.CodeMirror(codeEditorWrapperRef.current, {
-      lineNumbers: true,
-      lineWrapping: true,
-
-      value: code,
-    });
-  };
 
   useEffect(() => {
     resizer = document.getElementById("codeandFile");
@@ -91,11 +99,65 @@ function App() {
     runBtnElem.classList.add("not-allowed");
     runBtnElem.style.backgroundColor = "#54575B";
     document.getElementById("plot-canvas").style.display = "none";
-    loadCodeMirror();
+
     return () => {
       codeEditorWrapperRef.current.innerText = "";
     };
   }, []);
+
+  useEffect(() => {
+    codeEditorWrapperRef.current.innerText = "";
+    codeMirrorRef.current = window.CodeMirror(codeEditorWrapperRef.current, {
+      lineNumbers: true,
+      lineWrapping: true,
+
+      value: code,
+    });
+
+    // Save the code every time it is written
+  }, [code]);
+
+  // Code for folder structure
+  const createTempFiles = async () => createFS(fileStructure);
+
+  useEffect(() => {
+    if (!initRef.current) return;
+
+    createFS(fileStructure);
+  }, [fileStructure]);
+
+  useEffect(() => {
+    (async function () {
+      const files = await fs.lookupPath("/");
+
+      // if (!files.includes("src")) {
+      await createTempFiles();
+
+      initRef.current = true;
+      // const filesdata = await fs.lookupPath("/RCode");
+
+      //}
+    })();
+  }, []);
+
+  const allFilesInfo = allFiles(fileStructure);
+
+  const handleFileChange = (e, path) => {
+    const codeFile = getValueOfGivenPath(allFilesInfo, path);
+
+    const updatedFileStructure = fileStructure.map((file) => {
+      if (file.path === path) {
+        file.opened = true;
+      } else {
+        file.opened = false;
+      }
+      return file;
+    });
+
+    setFileStructure(updatedFileStructure);
+
+    setCode(codeFile);
+  };
 
   const ResizeElement = () => {
     document.addEventListener("mousemove", resize, false);
@@ -112,26 +174,14 @@ function App() {
       resizer.style.width = size;
     }
   };
+ 
 
   const runRCode = async () => {
     const codeToRun = codeMirrorRef.current.getValue();
+    const updateCodeAfterSource = getUpdatedCode(codeToRun, fileStructure);
     const resultContainer = document.getElementById("output-section");
     resultContainer.innerText = "";
-    webRConsole.stdin(codeToRun);
-  };
-
-  const handleFileChange = (e, index) => {
-    let i;
-
-    const codeFile = FilesAndCodes[index].initialCode;
-
-    setCode(codeFile);
-    const tablinks = document.getElementsByClassName("tablink");
-
-    for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace("highlight", "");
-    }
-    e.currentTarget.className += "highlight";
+    webRConsole.stdin(updateCodeAfterSource);
   };
 
   return (
@@ -141,21 +191,28 @@ function App() {
           <img style={{ height: "32px", width: "32px" }} src={newLogo} />
           <RHeader>R Code Playground </RHeader>
         </LogoAndHeader>
+        
+        <NodeStructure
+          activeFile={activeFile}
+          setActiveFile={setActiveFile}
+          setCode={setCode}
+        />
 
         <RContainer>
           <CodeandFile id="codeandFile">
             <FileandRun className="fileAndRun">
               <FileNames>
-                {FilesAndCodes.map((file, index) => {
-                  return (
-                    <div
-                      className={`${index === 0 ? "highlight" : ""} tablink `}
-                      onClick={(e) => handleFileChange(e, index)}
-                    >
-                      {file.fileName}
-                    </div>
-                  );
-                })}
+                {allFilesInfo &&
+                  allFilesInfo.map((file, index) => {
+                    return (
+                      <div
+                        className={`${file.opened ? "highlight" : ""} tablink `}
+                        onClick={(e) => handleFileChange(e, file.path)}
+                      >
+                        {file.path.split("/").slice(-1)[0]}
+                      </div>
+                    );
+                  })}
               </FileNames>
 
               <RunButton
@@ -164,12 +221,12 @@ function App() {
                 onClick={runRCode}
               >
                 Run
-                <div id="tooltipId" class="tooltip">
+                <div id="tooltipId" className="tooltip">
                   Files loading, please wait.
                 </div>
               </RunButton>
             </FileandRun>
-            <div ref={codeEditorWrapperRef}></div>
+            <div id="editor" ref={codeEditorWrapperRef}></div>
           </CodeandFile>
           <ResizeBar
             onMouseDown={ResizeElement}
@@ -304,6 +361,10 @@ const Canvas = styled.canvas`
   @media (max-width: 768px) {
     transform: scale(0.3);
   }
+`;
+
+const File = styled.div`
+  cursor: pointer;
 `;
 
 export default App;
